@@ -2,55 +2,143 @@
 
 @section('content')
     <script>
-        var markers = [
-        {
-            "title": 'Aksa Beach',
-            "lat": '19.1759668',
-            "lng": '72.79504659999998',
-            "description": 'Aksa Beach is a popular beach and a vacation spot in Aksa village at Malad, Mumbai.'
-        },
-        {
-            "title": 'Juhu Beach',
-            "lat": '19.0883595',
-            "lng": '72.82652380000002',
-            "description": 'Juhu Beach is one of favorite tourist attractions situated in Mumbai.'
-        },
-        {
-            "title": 'Girgaum Beach',
-            "lat": '18.9542149',
-            "lng": '72.81203529999993',
-            "description": 'Girgaum Beach commonly known as just Chaupati is one of the most famous public beaches in Mumbai.'
-        },
-        {
-            "title": 'Jijamata Udyan',
-            "lat": '18.979006',
-            "lng": '72.83388300000001',
-            "description": 'Jijamata Udyan is situated near Byculla station is famous as Mumbai (Bombay) Zoo.'
-        },
-        {
-            "title": 'Sanjay Gandhi National Park',
-            "lat": '19.2147067',
-            "lng": '72.91062020000004',
-            "description": 'Sanjay Gandhi National Park is a large protected area in the northern part of Mumbai city.'
+        var map;
+        var markers = [];//{!! json_encode($markers) !!};
+        
+        // function myMap() {
+        //     var myLatlng = new google.maps.LatLng(48.779502, 30.967857);
+        //     var myOptions = {
+        //         zoom: 6,
+        //         center: myLatlng,
+        //         mapTypeId: google.maps.MapTypeId.ROADMAP
+        //     }
+        //     map = new google.maps.Map(document.getElementById("googleMap"), myOptions);
+        //     // for (var i = 0, length = markers.length; i < length; i++) {
+        //     //     var data = markers[i];
+        //     //     latLng = new google.maps.LatLng(data.lat, data.lng); 
+        //     //     var marker = new google.maps.Marker({
+        //     //         position: latLng,
+        //     //         map: map,
+        //     //         title: data.title
+        //     //     });
+        //     // }
+        // }
+        var markers = [];
+        var arrmarkers = {!! json_encode($markers) !!};
+        function addMarker(data) {
+            const d = new Date();
+            let minutes = d.getMinutes();
+            
+            if (minutes !== 31) {
+                console.log(data.id)
+                newplace = new google.maps.LatLng(data.lat, data.lng);
+                console.log(markers);
+                
+                const marker = new google.maps.Marker({
+                    position: newplace,
+                    map: map,
+                    title: data.title
+                });
+                //console.log(marker.getPosition().lat());
+                // if(data.id == 16) {
+                //     markers.push(marker);
+                // }
+                // while(markers.length) { 
+                //     markers.pop().setMap(null); 
+                // }
+                //marker.setMap(null);
+                const infowindow = new google.maps.InfoWindow({
+                    content: data.description,
+                });
+                marker.addListener("click", () => {
+                    infowindow.open({
+                    anchor: marker,
+                    map,
+                        shouldFocus: false,
+                    });
+                });
+                markers.push(marker);
+                console.log(markers);
+            } else {
+                console.log(minutes);
+                    
+            }
         }
-        ];
-        function myMap() {
-            var mapProp= {
-            center:new google.maps.LatLng(51.508742,-0.120850),
-            zoom:5,
+
+        setInterval(function mapload(){
+            $.ajax({
+                type: "GET", 
+                url:"{{ route('marker.index') }}",
+                // data: form_data,
+                success: function(data)
+                {
+                    var json_obj = jQuery.parseJSON(JSON.stringify(data));
+                    console.log(json_obj[1].description);
+                    for (var i in json_obj) 
+                    {	
+                        // if (json_obj[i].description == 'try2') {
+                        //     delete json_obj[i];
+                        // } else {
+                            addMarker(json_obj[i]); 
+                        // }              
+                    }   
+                },
+                dataType: "json"//set to JSON    
+            })    
+        }, 3000);
+        
+        
+        window.onload = function () {
+            var mapOptions = {
+                center: new google.maps.LatLng(48.779502, 30.967857),
+                zoom: 5,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
             };
-            var map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
-            for (var i = 0, length = markers.length; i < length; i++) {
-                var data = markers[i],
-                    latLng = new google.maps.LatLng(data.lat, data.lng); 
-                // Creating a marker and putting it on the map
+            var map = new google.maps.Map(document.getElementById("googleMap"), mapOptions);
+            for (var i = 0, length = arrmarkers.length; i < length; i++) {
+                var data = arrmarkers[i];
+                latLng = new google.maps.LatLng(data.lat, data.lng); 
                 var marker = new google.maps.Marker({
                     position: latLng,
                     map: map,
                     title: data.title
                 });
+                markers.push(marker);
             }
-        }
+            // //Attach click event handler to the map.
+            // google.maps.event.addListener(map, 'click', function (e) {
+    
+            //     //Determine the location where the user has clicked.
+            //     var location = e.latLng;
+    
+            //     //Create a marker and placed it on the map.
+            //     var marker = new google.maps.Marker({
+            //         position: location,
+            //         map: map
+            //     });
+    
+            //     //Attach click event handler to the marker.
+            //     google.maps.event.addListener(marker, "click", function (e) {
+            //         var infoWindow = new google.maps.InfoWindow({
+            //             content: 'Latitude: ' + location.lat() + '<br />Longitude: ' + location.lng()
+            //         });
+            //         infoWindow.open(map, marker);
+            //     });
+    
+            //     //Add marker to the array.
+            //     markers.push(marker);
+            //     console.log(markers)
+            // });
+        };
+
+        function DeleteMarkers() {
+            //Loop through all the markers and remove
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(null);
+            }
+            markers = [];
+        };
+        
     </script>
     
     <div class="container">
@@ -65,52 +153,54 @@
             </div>
             <div class="col-md-4">
                 <h4>Додайте маркер на карту</h4>
+                <div class="alert alert-success print-success-msg" style="display:none">
+                    <div class="success"></div>
+                </div>
                 <div class="alert alert-danger print-error-msg" style="display:none">
                     <ul></ul>
                 </div>
-                <form action="javascript:void(0)" onsubmit="addMarker()">
+                <form action="javascript:void(0)" id="marker_form" onsubmit="saveMarker()">
                     <label class="form-check-label" for="title">Назва</label>
                     <input type="text" name="title" id="title" class="form-control" >
                     @error('title') <span class="error">{{ $message }}</span> @enderror
-                    <label class="form-check-label" for="latitude">Latitude</label>
-                    <input type="text" name="latitude" id="latitude" class="form-control" required>
-                    @error('latitude') <span class="error">{{ $message }}</span> @enderror
-                    <label class="form-check-label" for="longitude">Longitude</label>
-                    <input type="text" name="longitude" id="longitude" class="form-control" required>
-                    @error('longitude') <span class="error">{{ $message }}</span> @enderror
+                    <label class="form-check-label" for="lat">Latitude</label>
+                    <input type="number" name="lat" id="lat" step="any" class="form-control" required>
+                    @error('lat') <span class="error">{{ $message }}</span> @enderror
+                    <label class="form-check-label" for="lng">Longitude</label>
+                    <input type="number" name="lng" id="lng" step="any" class="form-control" required>
+                    @error('lng') <span class="error">{{ $message }}</span> @enderror
                     <label class="form-check-label" for="description">Опис</label>
-                        <textarea name="description" id="description" cols="20" rows="8" class="form-control"></textarea>
+                    <textarea name="description" id="description" cols="20" rows="8" class="form-control"></textarea>
                     @error('description') <span class="error">{{ $message }}</span> @enderror
-                    <button type="submit" class="btn btn-primary btn-submit mt-1">Відправити</button>
-                    
+                    <button type="submit" class="btn btn-primary btn-submit mt-1">Додати</button>
                 </form>
+
+                <input type="button" value="Delete" onclick="DeleteMarkers()" />
             </div>
         </div>
     </div>
-        
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQhBg5cIrNqsll1mXvjKR_fyt4yWenncU&callback=myMap"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQhBg5cIrNqsll1mXvjKR_fyt4yWenncU"></script>    
+    {{-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQhBg5cIrNqsll1mXvjKR_fyt4yWenncU&callback=myMap"></script> --}}
 
     <script type="text/javascript">
-
-
-        function addMarker() {
+        function saveMarker() {
             var title = $("#title").val();
-            var latitude = $("#latitude").val();
-            var longitude = $("#longitude").val();
+            var lat = $("#lat").val();
+            var lng = $("#lng").val();
             var description = $("#description").val();
     
             $.ajax({
-               type:'POST',
-               headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-               url:"{{ route('marker.store') }}",
-               data:{title:title, latitude:latitude, longitude:longitude, description:description},
-               success:function(data){
+                type:'POST',
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                url:"{{ route('marker.store') }}",
+                data:{title:title, lat:lat, lng:lng, description:description},
+                success:function(data){
                     if($.isEmptyObject(data.error)){
-                        alert(data.success);
-                    } else {
-                    
-                    }
-               },
+                        printSuccessMsg(data.success);
+                        $('#marker_form').trigger("reset");
+                        addMarker(lat, lng);
+                    } 
+                },
                 error: function(data){
                     console.log(data.responseJSON);
                     printErrorMsg(data.responseJSON.errors);
@@ -122,16 +212,18 @@
             $(".print-error-msg").find("ul").html('');
             $(".print-error-msg").css('display','block');
             $.each( msg, function( key, value ) {
-            $(".print-error-msg").find("ul").append('<li>'+value+'</li>');
-        });
+                $(".print-error-msg").find("ul").append('<li>'+value+'</li>');
+            });
+        }
 
-}
-        // $(".btn-submit").click(function(e){
-        //     e.preventDefault();
-    
-            
-        // });
-    
+        function printSuccessMsg (msg) {
+            $(".print-success-msg").find("div").html('');
+            $(".print-success-msg").css('display','block');
+            $(".print-success-msg").find("div").append('<b>'+msg+'</b>');
+            setTimeout(() => {
+                $(".print-success-msg").css('display','none');
+            }, 2000);
+        }
     </script>
     
 @endsection

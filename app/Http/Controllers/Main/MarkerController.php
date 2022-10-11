@@ -12,15 +12,13 @@ class MarkerController extends Controller
     public function index()
     {
         $markers = Marker::all();
-        return 1;
-        //return view('markers.index', 'markers');
+        return $markers->toJson();
     }
 
     public function store(StoreRequest $request )
     {
         $data = $request->validated();
-        //print_r($data);
         Marker::create($data);
-        return response()->json(['success'=>'Got Simple Ajax Request.']);
+        return response()->json(['success'=>'Новий маркер додано!']);
     }
 }

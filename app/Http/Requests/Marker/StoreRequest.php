@@ -26,8 +26,8 @@ class StoreRequest extends FormRequest
         return [
             'title' => 'required|string',
             'description' => 'nullable|string',
-            'latitude' => 'required|min:4',
-            'longitude' => 'required|min:4',
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
         ];
     }
 
@@ -35,8 +35,8 @@ class StoreRequest extends FormRequest
     {
         return [
             'title.required' => 'Поле назва обов`язкове',
-            'latitude.required' => 'Поле latitude обов`язкове',
-            'longitude.required' => 'Поле longitude обов`язкове',
+            'lat.required' => 'Поле latitude обов`язкове',
+            'lng.required' => 'Поле longitude обов`язкове',
         ];   
     }
 }
