@@ -10,7 +10,7 @@ class IndexController extends Controller
 {
     public function __invoke()
     {
-        $markers = Marker::all();
+        $markers = Marker::where('created_at', '>', date('Y-m-d H:i:s', strtotime('-1 minutes')))->get();
         return view('main.index', compact('markers'));
     }
 }
