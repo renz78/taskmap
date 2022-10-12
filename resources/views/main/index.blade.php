@@ -1,8 +1,7 @@
 @extends('layouts.main')
 
 @section('content')
-    
-    
+
     <div class="container">
         <div class="row">
             <div class="col-md-8">
@@ -36,8 +35,6 @@
                     @error('description') <span class="error">{{ $message }}</span> @enderror
                     <button type="submit" class="btn btn-primary btn-submit mt-1">Додати</button>
                 </form>
-
-                <input type="button" value="Delete" onclick="DeleteMarkers()" />
             </div>
         </div>
     </div>
@@ -51,109 +48,10 @@
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             };
         var map = new google.maps.Map(document.getElementById("googleMap"), mapOptions);
-        // function myMap() {
-        //     var myLatlng = new google.maps.LatLng(48.779502, 30.967857);
-        //     var myOptions = {
-        //         zoom: 6,
-        //         center: myLatlng,
-        //         mapTypeId: google.maps.MapTypeId.ROADMAP
-        //     }
-        //     map = new google.maps.Map(document.getElementById("googleMap"), myOptions);
-        //     // for (var i = 0, length = markers.length; i < length; i++) {
-        //     //     var data = markers[i];
-        //     //     latLng = new google.maps.LatLng(data.lat, data.lng); 
-        //     //     var marker = new google.maps.Marker({
-        //     //         position: latLng,
-        //     //         map: map,
-        //     //         title: data.title
-        //     //     });
-        //     // }
-        // }
         
         var arrmarkers = {!! json_encode($markers) !!};
-        function addMarker(data) {
-            const d = new Date();
-            let minutes = d.getMinutes();
-            //console.log(data)
-            newplace = new google.maps.LatLng(data.lat, data.lng);
-            //console.log(newplace);
-            
-            var marker = new google.maps.Marker({
-                position: newplace,
-                map: map,
-                title: data.title
-            });
-            //console.log(marker.getPosition().lat());
-            // if(data.id == 16) {
-            //     markers.push(marker);
-            // }
-            // while(markers.length) { 
-            //     markers.pop().setMap(null); 
-            // }
-            //marker.setMap(null);
-            const infowindow = new google.maps.InfoWindow({
-                content: data.description,
-            });
-            marker.addListener("click", () => {
-                infowindow.open({
-                anchor: marker,
-                map,
-                    shouldFocus: false,
-                });
-            });
-            markers.push(marker);
-               
-            
-        }
 
-        setInterval(function mapload(){
-            console.log(arrmarkers);
-            //markers = [];
-            $.ajax({
-                type: "GET", 
-                url:"{{ route('marker.index') }}",
-                // data: form_data,
-                success: function(data)
-                {
-                    console.log(arrmarkers.length);
-                    
-                    //var json_obj = jQuery.parseJSON(JSON.stringify(data));
-                    console.log()
-                    
-                    for ( var j in arrmarkers ) {
-                        //console.log('j-'+j);
-                        var check = 0;
-                        for (var i in data) {	
-                            //console.log('i-'+i);
-                            
-                            if (arrmarkers[j]['id'] == data[i]['id']) {
-                                check = 1;
-                                
-                                //console.log(arrmarkers[j]['id']+'----'+data[i]['id']);
-                            }
-                        
-                            addMarker(data[i]); 
-                            if (data.length > arrmarkers.length) {
-                                
-                            }
-                                
-                            
-                        }
-                        if (check == 0) {
-                            console.log('deleted');
-                            DeleteMarkers();
-                            //console.log(data[j]['id']);
-                        }
-                    }         
-                    arrmarkers = data;
-                    //console.log(typeof arrmarkers);
-                },
-                dataType: "json"//set to JSON    
-            })    
-        }, 1000);
-        
-        
-         window.onload = function () {
+        window.onload = function () {
             
             for (var i = 0, length = arrmarkers.length; i < length; i++) {
                 var data = arrmarkers[i];
@@ -165,31 +63,63 @@
                 });
                 markers.push(marker);
             }
-        //     // //Attach click event handler to the map.
-        //     google.maps.event.addListener(map, 'click', function (e) {
-    
-        //         //Determine the location where the user has clicked.
-        //         var location = e.latLng;
-    
-        //         //Create a marker and placed it on the map.
-        //         var marker = new google.maps.Marker({
-        //             position: location,
-        //             map: map
-        //         });
-    
-        //         //Attach click event handler to the marker.
-        //         google.maps.event.addListener(marker, "click", function (e) {
-        //             var infoWindow = new google.maps.InfoWindow({
-        //                 content: 'Latitude: ' + location.lat() + '<br />Longitude: ' + location.lng()
-        //             });
-        //             infoWindow.open(map, marker);
-        //         });
-    
-        //         //Add marker to the array.
-        //         markers.push(marker);
-        //         console.log(markers)
-        //     });
-         };
+        };
+
+        function addMarker(data) {
+            const d = new Date();
+            let minutes = d.getMinutes();
+            
+            newplace = new google.maps.LatLng(data.lat, data.lng);
+           
+            var marker = new google.maps.Marker({
+                position: newplace,
+                map: map,
+                title: data.title
+            });
+           
+            const infowindow = new google.maps.InfoWindow({
+                content: data.description,
+            });
+            marker.addListener("click", () => {
+                infowindow.open({
+                anchor: marker,
+                map,
+                    shouldFocus: false,
+                });
+            });
+            markers.push(marker);
+        }
+
+        setInterval(function mapload(){
+            console.log(arrmarkers);
+            $.ajax({
+                type: "GET", 
+                url:"{{ route('marker.index') }}",
+                // data: form_data,
+                success: function(data)
+                {
+                    //var json_obj = jQuery.parseJSON(JSON.stringify(data));
+                    for ( var j in arrmarkers ) {
+                        var check = 0;
+                        for (var i in data) {	
+                            if (arrmarkers[j]['id'] == data[i]['id']) {
+                                check = 1;
+                            }
+                            addMarker(data[i]); 
+                        }
+                        if (check == 0) {
+                            console.log('deleted');
+                            DeleteMarkers();
+                        }
+                    }         
+                    arrmarkers = data;
+                },
+                dataType: "json"   
+            })    
+        }, 1000);
+        
+        
+         
 
         function DeleteMarkers() {
             //Loop through all the markers and remove
@@ -199,8 +129,6 @@
             markers = [];
         };
         
-    </script>
-    <script type="text/javascript">
         function saveMarker() {
             var title = $("#title").val();
             var lat = $("#lat").val();
