@@ -2,15 +2,16 @@
 
 @section('content')
 
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col-md-8">
                 <h3>Тестове завдання</h3>
             </div>
         </div>
+        
         <div class="row">
             <div class="col-md-8">
-                <div id="googleMap" style="width:100%;height:500px;"></div>
+                <div id="googleMap" style="height:500px;"></div>
             </div>
             <div class="col-md-4">
                 <h4>Додайте маркер на карту</h4>
